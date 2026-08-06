@@ -18,7 +18,7 @@ export type FeeFields = {
 function pctToBps(pct: string): bigint {
   const t = (pct || '0').trim()
   if (!/^\d+(\.\d{1,2})?$/.test(t)) {
-    throw new Error(`Invalid percentage "${pct}" — use up to 2 decimals (e.g. 1.5)`)
+    throw new Error(`Invalid percentage "${pct}": use up to 2 decimals (e.g. 1.5)`)
   }
   return BigInt(Math.round(parseFloat(t) * 100))
 }
@@ -76,7 +76,7 @@ export function FeeConfigFields({ fields, onChange, maxBps, maxFixedFee }: Props
 
   return (
     <div className="space-y-4">
-      <div className="text-xs text-subtle">Fee schedule{capHint ? ` — ${capHint}` : ''}</div>
+      <div className="text-xs text-subtle">Fee schedule{capHint ? ` · ${capHint}` : ''}</div>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field
           label="Deposit fee (%)"

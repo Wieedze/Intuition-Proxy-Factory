@@ -114,7 +114,7 @@ function buildAgentGuide({
     network === 'mainnet'
       ? 'https://rpc.intuition.systems'
       : 'https://testnet.rpc.intuition.systems'
-  return `# Intuition FeeProxy — integration guide for an AI coding agent
+  return `# Intuition FeeProxy: integration guide for an AI coding agent
 
 You are wiring the Intuition FeeProxy into a dApp. This is the complete spec.
 
@@ -123,7 +123,7 @@ FeeProxy is a single multi-tenant contract per network in front of the Intuition
 A dApp registers once as an affiliate, sets a fee schedule, and points the app at its affiliate
 address. On every routed deposit or atom/triple creation the proxy takes the affiliate fee,
 pushes it to the affiliate's recipient, and forwards the rest to the MultiVault. No per-dApp
-deployment, no fee pool, no withdraw — fees are pushed at routing time.
+deployment, no fee pool, no withdraw. Fees are pushed at routing time.
 
 ## Addresses (Intuition ${network}, chainId ${chainId})
 - FeeProxy singleton: ${feeProxy}
@@ -347,7 +347,7 @@ function Quickstart() {
             <Link to="/register" className="text-brand underline decoration-brand/50">
               Register
             </Link>{' '}
-            — set your deposit/creation fees (in %) and a fee recipient, then submit. You only
+            and set your deposit/creation fees (in %) and a fee recipient, then submit. You only
             pay gas plus the protocol&apos;s registration fee.
           </>,
           <>
@@ -365,9 +365,9 @@ function Quickstart() {
           </>,
         ]}
       </Steps>
-      <Callout title="Fastest path — hand it to an AI agent">
+      <Callout title="Fastest path: hand it to an AI agent">
         Copy the whole integration spec (live addresses, <Code>depositVia</Code> signature, fee
-        math, approval flow) and paste it into your coding agent (Claude Code, Cursor, …) — it
+        math, approval flow) and paste it into your coding agent (Claude Code, Cursor, …) and it
         scaffolds the integration for you. Same content as the{' '}
         <Link to="/docs/agent" className="text-brand underline decoration-brand/50">
           AI agent prompt
@@ -406,7 +406,7 @@ function AffiliateModel() {
     <div className="space-y-5">
       <PageHeader kicker="Get started" title="Affiliate model" />
       <P>
-        Each wallet keys at most one affiliate row, keyed by its own address —{' '}
+        Each wallet keys at most one affiliate row, keyed by its own address:{' '}
         <Code>affiliate = msg.sender</Code> at registration. You manage your own
         row; nobody else can.
       </P>
@@ -434,7 +434,7 @@ function TestDapp() {
       <PageHeader kicker="Get started" title="Test dApp" />
       <P>
         A hosted single-page demo that routes a real fee through your affiliate
-        id — so you can confirm your registration works end to end before you
+        id, so you can confirm your registration works end to end before you
         build (or even start) your own dApp. It creates a tiny atom from a
         plain-text label (stored on-chain, no IPFS), takes your affiliate fee,
         and forwards the rest to the MultiVault. The routed call then shows up on
@@ -495,7 +495,7 @@ function TestDapp() {
         ]}
       </Steps>
       <Callout title="What you need">
-        A wallet on Intuition testnet (chain 13579) with a little TRUST — enough
+        A wallet on Intuition testnet (chain 13579) with a little TRUST, enough
         for gas plus the small routed amount. The fee goes to your configured fee
         recipient; the demo never holds funds.
       </Callout>
@@ -600,7 +600,7 @@ function Roles() {
       <PageHeader kicker="Reference" title="Roles & pause" />
       <P>
         The singleton uses OpenZeppelin AccessControl with two protocol roles,
-        both held by Intuition — never by affiliates:{' '}
+        both held by Intuition, never by affiliates:{' '}
         <Code>DEFAULT_ADMIN_ROLE</Code> (global bps / fixed-fee caps, the
         registration fee, affiliate unpause, role grants) and{' '}
         <Code>PAUSER_ROLE</Code> (global pause and per-affiliate pause).
@@ -610,13 +610,13 @@ function Roles() {
         As an affiliate you manage only your own row:{' '}
         <Code>registerAffiliate</Code>, <Code>updateAffiliateFees</Code> and{' '}
         <Code>updateFeeRecipient</Code>. You cannot change protocol caps or
-        pause anyone — those are protocol-side.
+        pause anyone; those are protocol-side.
       </P>
       <H3>If your row is paused</H3>
       <P>
         A pauser can flip <Code>pauseAffiliate</Code> on your row as a one-way
         kill switch (an admin reverses it via <Code>unpauseAffiliate</Code>).
-        While paused, new deposits and creations through your id revert — but
+        While paused, new deposits and creations through your id revert, but
         you can still update your fees and recipient, so routing resumes the
         instant it is unpaused. User redemptions against MultiVault are never
         affected.
@@ -636,7 +636,7 @@ function Integration() {
       </P>
       <Block>{`import { FeeProxyABI } from './abi/feeProxy'
 
-// In a wagmi app — route a deposit through your affiliate:
+// In a wagmi app, route a deposit through your affiliate:
 const shares = await writeContract(config, {
   address: feeProxy,            // the singleton (per network)
   abi: FeeProxyABI,
@@ -672,15 +672,15 @@ function AgentPrompt() {
       <PageHeader kicker="Reference" title="AI agent prompt" />
       <P>
         The full integration spec as one copy-paste block. Paste it into your AI coding agent
-        (Claude Code, Cursor, …) and it scaffolds a minimal, correct integration — it carries
+        (Claude Code, Cursor, …) and it scaffolds a minimal, correct integration. It carries
         the live <strong className="text-ink">Intuition testnet</strong> addresses, the{' '}
         <Code>depositVia</Code> signature, the fee math, and the one-time approval flow. (Same
         as the “Copy full guide” button at the top.)
       </P>
       <Block>{guide}</Block>
       <Callout title="Swap in your affiliate id">
-        Replace <Code>{'<YOUR_AFFILIATE_WALLET_ADDRESS>'}</Code> with the wallet you registered
-        — it&apos;s shown on{' '}
+        Replace <Code>{'<YOUR_AFFILIATE_WALLET_ADDRESS>'}</Code> with the wallet you registered;
+        it&apos;s shown on{' '}
         <Link to="/me" className="text-brand underline decoration-brand/50">
           My affiliate → Integration
         </Link>

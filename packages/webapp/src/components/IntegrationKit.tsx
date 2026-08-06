@@ -31,7 +31,7 @@ await writeContract(config, {
   abi: FeeProxyABI,
   functionName: 'depositVia',
   args: [
-    '${affiliate}', // your affiliate id — fees route to your recipient
+    '${affiliate}', // your affiliate id: fees route to your recipient
     receiver,       // who receives the shares
     termId,
     curveId,

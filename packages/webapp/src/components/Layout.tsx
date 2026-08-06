@@ -3,10 +3,6 @@ import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useDisconnect } from 'wagmi'
 
-import { useFeeProxyAddress } from '../hooks/useFeeProxyAddress'
-import Address from './Address'
-import LaserFlow from './LaserFlow'
-
 const NAV_ITEMS = [
   { to: '/', label: 'Home', end: true },
   { to: '/register', label: 'Register' },
@@ -17,8 +13,6 @@ const NAV_ITEMS = [
 
 export default function Layout() {
   const [scrolled, setScrolled] = useState(false)
-  const location = useLocation()
-  const isHome = location.pathname === '/'
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 4)
@@ -30,14 +24,15 @@ export default function Layout() {
   return (
     <div className="app-bg min-h-screen flex flex-col">
       <header
-        className={`sticky top-0 z-20 bg-canvas/70 backdrop-blur-md transition-colors ${
-          scrolled ? 'border-b border-line' : 'border-b border-transparent'
+        className={`sticky top-0 z-20 transition-colors ${
+          scrolled ? 'bg-canvas/60 backdrop-blur-md' : 'bg-transparent'
         }`}
       >
-        <div className="relative px-6 h-[72px] flex items-center gap-6">
+        <div className="relative px-[287px] h-[76px] flex items-center gap-6">
           <Wordmark />
 
-          <nav className="absolute left-1/2 -translate-x-1/2 flex items-center gap-6">
+          {/* Floating glass pill nav */}
+          <nav className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1 rounded-full border border-white/10 bg-black/30 p-1.5 backdrop-blur-md shadow-[0_4px_24px_-8px_rgba(0,0,0,0.6)]">
             {NAV_ITEMS.map((item) => (
               <NavItem key={item.to} to={item.to} end={item.end}>
                 {item.label}
@@ -46,64 +41,17 @@ export default function Layout() {
           </nav>
 
           <div className="ml-auto flex items-center gap-2 shrink-0">
-            <ThemeToggle />
             <WalletButton />
           </div>
         </div>
       </header>
 
-      <main className="relative flex-1">
-        <div
-          aria-hidden
-          className={`hidden dark:block pointer-events-none absolute inset-x-0 top-0 h-[1400px] z-0 transition-opacity ease-out ${
-            isHome ? 'opacity-100 duration-1000' : 'opacity-0 duration-100'
-          }`}
-          style={{
-            maskImage:
-              'linear-gradient(to bottom, transparent 0px, black 32px)',
-            WebkitMaskImage:
-              'linear-gradient(to bottom, transparent 0px, black 32px)',
-          }}
-        >
-          <div className="mx-auto max-w-6xl h-full px-6">
-            <LaserFlow
-              color="#F07A3F"
-              horizontalBeamOffset={0}
-              verticalBeamOffset={-0.07}
-              verticalSizing={100}
-              wispIntensity={3.0}
-              fogIntensity={0.5}
-            />
-          </div>
-        </div>
-        <div className="relative mx-auto max-w-6xl px-6 pt-14 pb-8 animate-fade-in">
+      <main className="relative flex-1 overflow-x-clip">
+        <div className="relative mx-auto max-w-[1440px] px-6 pt-14 pb-8 animate-fade-in">
           <Outlet />
         </div>
       </main>
 
-      <footer className="sticky bottom-0 z-20 bg-canvas/70 backdrop-blur-md border-t border-line">
-        <div className="px-6 py-4 flex items-center justify-between text-xs text-subtle">
-          <FeeProxyStamp />
-          <div className="flex items-center gap-5">
-            <a
-              href="https://intuition.systems"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-ink transition-colors"
-            >
-              Intuition ↗
-            </a>
-            <a
-              href="https://github.com/intuition-box"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-ink transition-colors"
-            >
-              GitHub ↗
-            </a>
-          </div>
-        </div>
-      </footer>
     </div>
   )
 }
@@ -142,64 +90,12 @@ function NavItem({
     <NavLink
       to={to}
       end={end}
-      className={`relative text-sm transition-colors ${
-        isActive ? 'text-ink' : 'text-muted hover:text-ink'
+      className={`rounded-full px-4 py-1.5 text-sm transition-colors ${
+        isActive ? 'bg-white/10 text-white' : 'text-neutral-400 hover:text-white'
       }`}
     >
       {children}
-      <span
-        className={`absolute left-0 right-0 -bottom-[25px] h-px bg-ink transition-opacity ${
-          isActive ? 'opacity-100' : 'opacity-0'
-        }`}
-      />
     </NavLink>
-  )
-}
-
-function ThemeToggle() {
-  const [isDark, setIsDark] = useState<boolean>(() =>
-    typeof document !== 'undefined'
-      ? document.documentElement.classList.contains('dark')
-      : true,
-  )
-
-  useEffect(() => {
-    const root = document.documentElement
-    if (isDark) {
-      root.classList.add('dark')
-      localStorage.setItem('theme', 'dark')
-    } else {
-      root.classList.remove('dark')
-      localStorage.setItem('theme', 'light')
-    }
-  }, [isDark])
-
-  return (
-    <button
-      type="button"
-      onClick={() => setIsDark((v) => !v)}
-      aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-      className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted hover:text-ink hover:bg-surface-hover transition-colors"
-    >
-      {isDark ? <SunIcon /> : <MoonIcon />}
-    </button>
-  )
-}
-
-function FeeProxyStamp() {
-  const { feeProxy, configured } = useFeeProxyAddress()
-  if (!configured) {
-    return (
-      <span className="inline-flex items-center gap-2 font-mono text-[11px] text-subtle">
-        FeeProxy not configured
-      </span>
-    )
-  }
-  return (
-    <span className="inline-flex items-center gap-2 font-mono text-[11px] text-subtle">
-      <span>FeeProxy</span>
-      <Address value={feeProxy} variant="short" />
-    </span>
   )
 }
 
@@ -504,19 +400,3 @@ function LogoMark() {
   )
 }
 
-function SunIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="4" />
-      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
-    </svg>
-  )
-}
-
-function MoonIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-    </svg>
-  )
-}

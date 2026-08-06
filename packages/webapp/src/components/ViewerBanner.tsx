@@ -10,7 +10,7 @@ export function ViewerBanner({ connected }: Props) {
       </span>
       <span className="leading-relaxed">
         {connected
-          ? 'Your connected wallet is not this affiliate — management actions are hidden.'
+          ? 'Your connected wallet is not this affiliate, so management actions are hidden.'
           : 'Connect the affiliate wallet to update its fees or fee recipient.'}
       </span>
     </div>

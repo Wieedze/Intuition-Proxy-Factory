@@ -15,16 +15,6 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
     />
-    <script>
-      (function () {
-        try {
-          var t = localStorage.getItem('theme')
-          var root = document.documentElement
-          if (t === 'light') root.classList.remove('dark')
-          else root.classList.add('dark')
-        } catch (_) {}
-      })()
-    </script>
   </head>
   <body class="antialiased">
     <div id="root"></div>

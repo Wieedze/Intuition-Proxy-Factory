@@ -1,204 +1,141 @@
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
-import { useProtocolStats } from '../hooks/useProtocolStats'
-import { formatTrust } from '../lib/format'
+import { useFeeProxyAddress } from '../hooks/useFeeProxyAddress'
+import Address from '../components/Address'
 
+/**
+ * Full-bleed hero: the brand video covers the entire viewport (it runs
+ * under the translucent sticky header), text is overlaid on the left.
+ * The section breaks out of the page container via the w-screen trick,
+ * and the negative top margin cancels the header (72px) + main padding
+ * (56px) so the video starts at the very top of the viewport.
+ */
 export default function HomePage() {
+  // The hero is a fixed full-viewport composition: no scrolling on Home.
+  useEffect(() => {
+    window.scrollTo(0, 0)
+    document.documentElement.style.overflow = 'hidden'
+    return () => {
+      document.documentElement.style.overflow = ''
+    }
+  }, [])
+
+  // position:fixed pins the hero to the exact viewport box — no flow math
+  // (header height + paddings + negative margins) that DPR rounding could
+  // turn into a seam at the top edge.
   return (
-    <div className="space-y-20">
-      {/* Hero: text + CTA left, live stats right, beam centered behind (Layout) */}
-      <section className="grid min-h-[560px] items-center gap-12 pt-6 lg:grid-cols-2">
-        <div className="space-y-6">
-          <h1 className="text-5xl font-semibold tracking-tight text-ink leading-[1.1]">
-            A shared fee layer for the{' '}
-            <span className="text-brand">Intuition MultiVault</span>.
+    <section className="fixed inset-0 flex items-center overflow-hidden bg-black">
+      {/* Nested masks = true intersection: horizontal fade on the wrapper,
+          vertical fade on the video. A single element with two mask layers
+          composites them additively in Blink, which cancels the top fade
+          wherever the horizontal mask is opaque. */}
+      <div
+        aria-hidden
+        className="absolute -right-[10%] top-0 h-[90%] aspect-video pointer-events-none"
+        style={{
+          maskImage: 'linear-gradient(to right, transparent 0%, black 30%)',
+          WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 30%)',
+        }}
+      >
+        <video
+          src={`${import.meta.env.BASE_URL}hero.mp4`}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          disablePictureInPicture
+          className="h-full w-full select-none"
+          style={{
+            maskImage:
+              'linear-gradient(to bottom, transparent 0%, black 12%, black 86%, transparent 100%)',
+            WebkitMaskImage:
+              'linear-gradient(to bottom, transparent 0%, black 12%, black 86%, transparent 100%)',
+          }}
+        />
+      </div>
+
+      {/* Legibility gradient over the video + fade into the page canvas below.
+          Fixed black tones (not theme tokens): the video background is always dark. */}
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/40 to-transparent"
+      />
+      <div
+        aria-hidden
+        className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-canvas to-transparent"
+      />
+
+      {/* Same horizontal padding as the header row so the copy sits on the wordmark's margin line. */}
+      <div className="relative w-full px-[287px] pt-[76px]">
+        {/* Previous hero block scaled up 25% (type, spacing, widths). */}
+        <div className="max-w-[1000px] space-y-10">
+          <h1 className="font-medium tracking-tight leading-[1.08] text-[60px] md:text-[75px] xl:text-[85px]">
+            <span className="block text-neutral-400">One shared fee layer.</span>
+            <span className="block text-white">Start earning on the MultiVault</span>
           </h1>
-          <p className="text-lg text-muted leading-relaxed max-w-md">
-            Register your dApp as an affiliate, set your fees once, and point
-            your app at your affiliate address — fees route straight to your
+
+          <p className="text-[22px] text-neutral-300 leading-relaxed max-w-[560px]">
+            Register your dApp as an affiliate, set your fees once, point
+            your app at your affiliate address.
+            Fees route straight to your
             recipient on every deposit and atom creation.
           </p>
-          <div className="flex items-center gap-4 pt-2">
-            <Link to="/register" className="btn-primary px-5 py-2.5">
+
+          <div className="flex items-center gap-5">
+            <Link to="/register" className="btn-primary px-6 py-3 text-[17px]">
               Register as affiliate
             </Link>
             <Link
               to="/docs"
-              className="rounded-md border border-line px-5 py-2.5 text-sm text-ink transition-colors hover:border-line-strong"
+              className="rounded-md border border-white/25 px-6 py-3 text-[17px] text-white transition-colors hover:border-white/50"
             >
               Read the docs
             </Link>
           </div>
         </div>
-
-        <div className="w-full max-w-sm lg:justify-self-end">
-          <NetworkStatsCard />
-        </div>
-      </section>
-
-      {/* Call flow, descended below the hero (label removed, position kept) */}
-      <section className="pt-8">
-        <CallFlow />
-      </section>
-    </div>
-  )
-}
-
-/** Glassy live-stats card sitting to the right of the beam in the hero. */
-function NetworkStatsCard() {
-  const { affiliateCount, totalForwarded, totalFees, totalTx, configured, isLoading } =
-    useProtocolStats()
-
-  const cell = (label: string, value: string) => (
-    <div className="space-y-1 border-t border-line pt-3">
-      <div className="text-[11px] uppercase tracking-wider text-subtle">{label}</div>
-      <div className="text-lg font-semibold text-ink">{isLoading ? '…' : value}</div>
-    </div>
-  )
-
-  return (
-    <div className="rounded-2xl border border-brand/25 bg-surface/70 p-6 backdrop-blur-md shadow-[0_0_60px_-15px_rgba(240,122,63,0.35)]">
-      <div className="text-[11px] font-medium uppercase tracking-wider text-subtle">
-        {configured ? 'Live on Intuition testnet' : 'Network'}
       </div>
-      <div className="mt-4 grid grid-cols-2 gap-x-6 gap-y-5">
-        {cell('Affiliates', configured ? String(affiliateCount) : '—')}
-        {cell('Funds routed', configured ? `${formatTrust(totalForwarded)} TRUST` : '—')}
-        {cell('Fees paid', configured ? `${formatTrust(totalFees)} TRUST` : '—')}
-        {cell('Transactions', configured ? totalTx.toString() : '—')}
-      </div>
-    </div>
-  )
-}
 
-function CallFlow() {
-  return (
-    <div className="relative z-10 rounded-2xl border border-brand/25 bg-surface p-8 md:p-10 shadow-[0_0_60px_-15px_rgba(240,122,63,0.35)]">
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr_auto_1fr] items-stretch gap-4 md:gap-0">
-        <FlowNode
-          icon={<WalletIcon />}
-          title="App"
-          subtitle=""
-          body="Routes a deposit through your affiliate address."
-        />
-        <FlowArrow />
-        <FlowNode
-          variant="fee"
-          icon={<ProxyIcon />}
-          title="FeeProxy"
-          subtitle=""
-          badge="FEE"
-          body="Takes your configured fee, pushes it to your fee recipient, forwards the rest."
-        />
-        <FlowArrow />
-        <FlowNode
-          icon={<VaultIcon />}
-          title="MultiVault"
-          subtitle=""
-          body="Executes the deposit; mints the position to the user."
-        />
-      </div>
-    </div>
-  )
-}
-
-function FlowNode({
-  icon,
-  title,
-  subtitle,
-  body,
-  variant = 'neutral',
-  badge,
-}: {
-  icon: React.ReactNode
-  title: string
-  subtitle: string
-  body: string
-  variant?: 'neutral' | 'fee'
-  badge?: string
-}) {
-  const border = variant === 'fee' ? 'border-brand/50' : 'border-line'
-  const bg = variant === 'fee' ? 'bg-brand/[0.06]' : 'bg-canvas'
-  const accentText = variant === 'fee' ? 'text-brand' : 'text-ink'
-  const iconText = variant === 'fee' ? 'text-brand' : 'text-muted'
-
-  return (
-    <div
-      className={`rounded-xl border ${border} ${bg} p-5 flex flex-col gap-3 min-h-[160px] h-full`}
-    >
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <span
-            className={`inline-flex h-8 w-8 items-center justify-center rounded-md border ${border} ${iconText}`}
+      {/* Footer as an overlay layer on the hero, on the shared margin line. */}
+      <div className="absolute inset-x-0 bottom-0 z-10 px-[287px] py-5 flex items-center justify-between text-xs text-neutral-500">
+        <FeeProxyStamp />
+        <div className="flex items-center gap-5">
+          <a
+            href="https://intuition.systems"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-white transition-colors"
           >
-            {icon}
-          </span>
-          <div className="flex flex-col leading-tight min-w-0">
-            <span className={`text-base font-semibold tracking-tight ${accentText}`}>
-              {title}
-            </span>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-subtle">
-              {subtitle}
-            </span>
-          </div>
-        </div>
-        {badge && (
-          <span
-            className={`shrink-0 rounded border px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-wider ${border} ${accentText}`}
+            Intuition ↗
+          </a>
+          <a
+            href="https://github.com/intuition-box"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-white transition-colors"
           >
-            {badge}
-          </span>
-        )}
+            GitHub ↗
+          </a>
+        </div>
       </div>
-      <p className="text-sm text-muted leading-relaxed">{body}</p>
-    </div>
+    </section>
   )
 }
 
-function FlowArrow() {
+function FeeProxyStamp() {
+  const { feeProxy, configured } = useFeeProxyAddress()
+  if (!configured) {
+    return (
+      <span className="inline-flex items-center gap-2 font-mono text-[11px]">
+        FeeProxy not configured
+      </span>
+    )
+  }
   return (
-    <div className="flex items-center justify-center px-4 py-2 md:py-0 md:min-w-[100px]">
-      <div className="flex items-center w-full">
-        <span className="h-px flex-1 bg-line" />
-        <svg
-          width="10"
-          height="10"
-          viewBox="0 0 10 10"
-          className="text-line ml-[-1px]"
-          aria-hidden="true"
-        >
-          <path d="M0 1 L8 5 L0 9 Z" fill="currentColor" />
-        </svg>
-      </div>
-    </div>
-  )
-}
-
-function WalletIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="6" width="18" height="13" rx="2" />
-      <path d="M16 12h3" />
-      <path d="M3 9h14a2 2 0 0 1 2 2" />
-    </svg>
-  )
-}
-
-function ProxyIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="4" y="4" width="16" height="16" rx="3" />
-      <path d="M8 9h8M8 12h8M8 15h5" />
-    </svg>
-  )
-}
-
-function VaultIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="5" width="18" height="14" rx="2" />
-      <circle cx="12" cy="12" r="3" />
-      <path d="M12 9v-1M12 16v-1M15 12h1M8 12h1" />
-    </svg>
+    <span className="inline-flex items-center gap-2 font-mono text-[11px]">
+      <span>FeeProxy</span>
+      <Address value={feeProxy} variant="short" />
+    </span>
   )
 }
